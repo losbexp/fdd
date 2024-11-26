@@ -1,3 +1,3 @@
 # fdd
 Fate Destinator Dice
-basically a dice roll sim with poetic results.
+is basically a dice roll sim with poetic results.
