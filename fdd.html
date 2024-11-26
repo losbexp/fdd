@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fate Destinator Dice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .container {
+            margin: 20px;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        #userResponse, #diceResult, #mentalWellBeing, #poemResult {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        footer {
+            margin-top: 50px;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Fate Destinator Dice</h1>
+    <p>Click the button to see your fate and feel better!</p>
+
+    <!-- Fate Destinator Dice Section (Above JokeAI Section) -->
+    <div class="container">
+        <h2>Roll the Dice</h2>
+        <button id="rollDiceButton">Roll the Dice</button>
+        <div id="diceResult"></div>
+        <div id="poemResult"></div>
+    </div>
+
+    <!-- Mental Well-Being Section (Below Dice) -->
+    <div class="container">
+        <button id="feelingBadButton">Feeling bad? Just do it. Click me.</button>
+        <div id="mentalWellBeing"></div>
+    </div>
+
+    <!-- JokeAI Section (Below Mental Well-Being) -->
+    <div class="container">
+        <h3>You'll be okay.</h3>
+        <div id="jokeAIResponse"></div>
+    </div>
+
+    <footer>
+        <p>Created by losb</p>
+    </footer>
+
+    <script>
+        // Dice Game Function: Roll a 4-digit number based on dice rolls
+        function rollDice() {
+            const diceResults = [];
+            for (let i = 0; i < 4; i++) {
+                diceResults.push(Math.floor(Math.random() * 6) + 1); // Rolls a 6-sided dice
+            }
+            return diceResults.join('');
+        }
+
+        // Interpret Dice Rolls: Color, Sense, Daytime
+        function interpretDice(diceRoll) {
+            const colors = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Indigo'];  // 1-6 for colors
+            const senses = ['Sight', 'Hearing', 'Touch', 'Taste', 'Smell', 'Intuition'];  // 1-6 for senses
+            const daytimes = ['Morning', 'Noon', 'Evening', 'Night', 'Dawn', 'Twilight'];  // 1-6 for times of day
+
+            // Dice roll digits correspond directly to array indices (1-6)
+            const firstDigit = parseInt(diceRoll.charAt(0)) - 1; // Color
+            const secondDigit = parseInt(diceRoll.charAt(1)) - 1; // Sense
+            const thirdDigit = parseInt(diceRoll.charAt(2)) - 1; // Time of Day
+            const fourthDigit = parseInt(diceRoll.charAt(3)) - 1; // Removed Tarot
+
+            return {
+                color: colors[firstDigit],  // Direct mapping for 1-6
+                sense: senses[secondDigit],  // Direct mapping for 1-6
+                daytime: daytimes[thirdDigit],  // Direct mapping for 1-6
+            };
+        }
+
+        // Poem Generation Based on Dice Roll
+        function generatePoem(diceRoll) {
+            const poems = [
+                "The wind whispers through the night, \nGuided by the light of the stars so bright.",
+                "Colors bloom in the morning sky, \nChasing dreams that flutter by.",
+                "A touch so soft, a taste so sweet, \nIn the moment where the senses meet.",
+                "In the silence of the evening glow, \nTime slows down, and thoughts can flow.",
+                "The dawn breaks, the new day begins, \nHope rises, a new chance to win.",
+                "Twilight falls, a gentle breeze, \nWhispers of the night come with ease."
+            ];
+
+            // Generate a valid poem index based on dice roll sum
+            const poemIndex = (parseInt(diceRoll.charAt(0)) + parseInt(diceRoll.charAt(1)) + parseInt(diceRoll.charAt(2)) + parseInt(diceRoll.charAt(3))) % poems.length;
+            return poems[poemIndex];
+        }
+
+        // Fetch JokeAI-generated response from a free API
+        async function getJokeAIResponse() {
+            const response = await fetch('https://v2.jokeapi.dev/joke/Any?type=single', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const data = await response.json();
+            return data.joke;
+        }
+
+        // Mental Well-Being Guesser Based on Dice Roll
+        function mentalWellBeingGuesser(diceRoll) {
+            const sum = diceRoll.split('').reduce((acc, num) => acc + parseInt(num), 0);
+            if (sum <= 12) {
+                return "You seem to be in a calm state of mind. Keep up the good work!";
+            } else if (sum <= 18) {
+                return "You're going through some ups and downs, but that's okay. Stay strong!";
+            } else {
+                return "It seems like you're going through a rough patch. Remember, things will get better!";
+            }
+        }
+
+        // Handle button click for "Feeling bad? Click me once"
+        document.getElementById("feelingBadButton").addEventListener("click", async () => {
+            // Display a positive mental well-being message
+            document.getElementById("mentalWellBeing").innerText = "We're here for you! Let's make you smile 😊";
+
+            // Get a joke from JokeAI
+            const jokeResponse = await getJokeAIResponse();
+            document.getElementById("mentalWellBeing").innerText += `\n\nHere's a joke to cheer you up: \n${jokeResponse}`;
+        });
+
+        // Handle Dice Rolling
+        document.getElementById("rollDiceButton").addEventListener("click", () => {
+            const diceRoll = rollDice();
+            const result = interpretDice(diceRoll);
+            const poem = generatePoem(diceRoll);
+            const mentalState = mentalWellBeingGuesser(diceRoll);
+
+            // Display Dice Results
+            document.getElementById("diceResult").innerHTML = `
+                <p>Rolled Number: ${diceRoll}</p>
+                <p>Color: ${result.color}</p>
+                <p>Senses: ${result.sense}</p>
+                <p>Time of Day: ${result.daytime}</p>
+            `;
+
+            // Display Generated Poem
+            document.getElementById("poemResult").innerText = `Poem Based on Your Roll: \n\n${poem}`;
+
+            // Display Mental Well-Being Guesser
+            document.getElementById("mentalWellBeing").innerText = mentalState;
+        });
+    </script>
+
+</body>
+</html>
